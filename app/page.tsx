@@ -10,10 +10,11 @@ type SpotifyUser = {
 
 export default function Home() {
   const [user, setUser] = useState<SpotifyUser | null>(null);
-  const [origin, setOrigin] = useState("");
+  const [origin] = useState(() =>
+    typeof window !== "undefined" ? window.location.origin : ""
+  );
 
   useEffect(() => {
-    setOrigin(window.location.origin);
     fetch("/api/spotify/user")
       .then((r) => r.json())
       .then((data) => {
@@ -60,6 +61,17 @@ export default function Home() {
           View Widget
         </a>
       </div>
+
+      <p className="max-w-md text-center text-xs text-zinc-600">
+        This widget is designed for personal use only.{" "}
+        <a
+          href="https://github.com/cltq/spotify-widget.self"
+          className="underline hover:text-zinc-400"
+        >
+          Fork it on GitHub
+        </a>{" "}
+        to make it your own.
+      </p>
 
       <div className="mt-8 max-w-lg rounded-lg border border-zinc-800 bg-zinc-900 p-6 text-sm">
         <h2 className="mb-2 font-semibold text-white">OBS Setup</h2>
