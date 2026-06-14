@@ -21,7 +21,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-8 p-8 font-sans">
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-8 bg-zinc-950 p-8 font-sans">
       <h1 className="text-3xl font-bold tracking-tight text-white">
         Spotify Widget
       </h1>
