@@ -8,25 +8,10 @@ type SpotifyUser = {
   product?: string;
 };
 
-const SYSTEM_FONTS = ["system-ui", "sans-serif", "monospace", "serif"];
-const GOOGLE_FONTS = [
-  "Inter",
-  "Roboto",
-  "Open Sans",
-  "Montserrat",
-  "Poppins",
-  "Lato",
-  "Noto Sans",
-  "Oswald",
-  "Raleway",
-  "Source Sans Pro",
-];
-
 export default function Home() {
   const [user, setUser] = useState<SpotifyUser | null>(null);
   const [bg, setBg] = useState("transparent");
   const [color, setColor] = useState("#ffffff");
-  const [font, setFont] = useState("system-ui");
   const [size, setSize] = useState("md");
   const [showProgress, setShowProgress] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -41,7 +26,7 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
-  const widgetUrl = `${origin}/widget?bg=${encodeURIComponent(bg)}&color=${encodeURIComponent(color)}&font=${encodeURIComponent(font)}&size=${size}&progress=${showProgress ? "bar" : "none"}`;
+  const widgetUrl = `${origin}/widget?bg=${encodeURIComponent(bg)}&color=${encodeURIComponent(color)}&size=${size}&progress=${showProgress ? "bar" : "none"}`;
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(widgetUrl).then(() => {
@@ -87,13 +72,13 @@ export default function Home() {
       </div>
 
       <div className="flex w-full max-w-4xl flex-col gap-6 lg:flex-row">
-        <div className="min-h-32 flex-1 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950">
+        <div className="flex-1 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950">
           <iframe
             key={widgetUrl}
             src={widgetUrl}
             title="Widget Preview"
-            className="h-full w-full"
-            style={{ minHeight: 160 }}
+            className="w-full"
+            style={{ height: 100, minHeight: 100 }}
           />
         </div>
 
@@ -129,30 +114,6 @@ export default function Home() {
                 onChange={(e) => setColor(e.target.value)}
                 className="size-7 cursor-pointer rounded border border-zinc-700 bg-transparent"
               />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <label className="text-sm text-zinc-400">Font</label>
-              <select
-                value={font}
-                onChange={(e) => setFont(e.target.value)}
-                className="w-36 rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-300"
-              >
-                <optgroup label="System">
-                  {SYSTEM_FONTS.map((f) => (
-                    <option key={f} value={f}>
-                      {f}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="Google Fonts">
-                  {GOOGLE_FONTS.map((f) => (
-                    <option key={f} value={f}>
-                      {f}
-                    </option>
-                  ))}
-                </optgroup>
-              </select>
             </div>
 
             <div className="flex items-center justify-between">
@@ -202,6 +163,10 @@ export default function Home() {
               {copied ? "Copied!" : "Copy"}
             </button>
           </div>
+
+          <p className="mt-3 text-xs text-zinc-500">
+            OBS Browser Source: <strong>400 × 120</strong>
+          </p>
         </div>
       </div>
 
