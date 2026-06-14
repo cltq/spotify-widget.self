@@ -10,8 +10,10 @@ type SpotifyUser = {
 
 export default function Home() {
   const [user, setUser] = useState<SpotifyUser | null>(null);
+  const [origin, setOrigin] = useState("");
 
   useEffect(() => {
+    setOrigin(window.location.origin);
     fetch("/api/spotify/user")
       .then((r) => r.json())
       .then((data) => {
@@ -68,7 +70,7 @@ export default function Home() {
           <li>
             Set URL to{" "}
             <code className="rounded bg-zinc-800 px-1 text-zinc-200">
-              http://localhost:3000/widget
+              {origin}/widget
             </code>
           </li>
           <li>Set width to 400, height to 100</li>
