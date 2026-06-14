@@ -41,38 +41,43 @@ function useParams(): WidgetParams {
   };
 }
 
-const GOOGLE_FONTS = new Set([
-  "Inter",
-  "Roboto",
-  "Open Sans",
-  "Montserrat",
-  "Poppins",
-  "Lato",
-  "Noto Sans",
-  "Oswald",
-  "Raleway",
-  "Source Sans Pro",
-]);
+type ScriptFont = {
+  family: string;
+  test: RegExp;
+};
 
-function useGoogleFont(font: string) {
-  useEffect(() => {
-    if (!GOOGLE_FONTS.has(font)) return;
+const SCRIPT_FONTS: ScriptFont[] = [
+  { family: "Chakra Petch", test: /[\u0E00-\u0E7F]/ },
+  { family: "Noto Sans JP", test: /[\u3040-\u309F\u30A0-\u30FF]/ },
+  { family: "Noto Sans SC", test: /[\u4E00-\u9FFF]/ },
+  { family: "Noto Sans KR", test: /[\uAC00-\uD7AF]/ },
+  { family: "Noto Sans Arabic", test: /[\u0600-\u06FF]/ },
+  { family: "Noto Sans Devanagari", test: /[\u0900-\u097F]/ },
+];
 
-    const id = `gf-${font.replace(/\s+/g, "-")}`;
-    if (document.getElementById(id)) return;
+function detectFont(text: string, fallback: string): string {
+  for (const sf of SCRIPT_FONTS) {
+    if (sf.test.test(text)) return sf.family;
+  }
+  return fallback;
+}
 
-    const family = font.replace(/ /g, "+");
-    const link = document.createElement("link");
-    link.id = id;
-    link.rel = "stylesheet";
-    link.href = `https://fonts.googleapis.com/css2?family=${family}:wght@400;600;700&display=swap`;
-    document.head.appendChild(link);
+function loadGoogleFont(font: string) {
+  const id = `gf-${font.replace(/\s+/g, "-")}`;
+  if (document.getElementById(id)) return;
+  const family = font.replace(/ /g, "+");
+  const link = document.createElement("link");
+  link.id = id;
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${family}:wght@400;600;700&display=swap`;
+  document.head.appendChild(link);
+}
 
-    return () => {
-      const el = document.getElementById(id);
-      if (el) el.remove();
-    };
-  }, [font]);
+function msToTime(ms: number): string {
+  const total = Math.floor(ms / 1000);
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 const sizeMap: Record<string, { img: number; title: string; artist: string }> =
@@ -89,7 +94,12 @@ export default function WidgetPage() {
   const prevTitleRef = useRef<string | undefined>(undefined);
   const params = useParams();
 
-  useGoogleFont(params.font);
+  const text = [status?.title, status?.artist].filter(Boolean).join(" ");
+  const activeFont = detectFont(text, params.font);
+
+  useEffect(() => {
+    loadGoogleFont(activeFont);
+  }, [activeFont]);
 
   useEffect(() => {
     async function fetchStatus() {
@@ -133,19 +143,20 @@ export default function WidgetPage() {
 
   const isPaused = status && !status.isPlaying && status.title;
   const dims = sizeMap[params.size] ?? sizeMap.md;
-  const progress =
+  const showBar =
     params.progress === "bar" &&
     status?.durationMs &&
-    (status.isPlaying || isPaused)
-      ? Math.min((elapsed / status.durationMs) * 100, 100)
-      : null;
+    (status.isPlaying || isPaused);
+  const progress = showBar
+    ? Math.min((elapsed / status.durationMs!) * 100, 100)
+    : null;
 
   return (
     <div
       style={{
         background: params.bg,
         color: params.color,
-        fontFamily: params.font,
+        fontFamily: activeFont,
       }}
       className={`flex items-center gap-3 p-4 transition-opacity duration-500 ${
         animating ? "opacity-0" : "opacity-100"
@@ -174,28 +185,39 @@ export default function WidgetPage() {
             >
               {status?.artist}
             </p>
-            {isPaused && (
+            {showBar && (
+              <div className="mt-1.5 flex w-1/2 items-center gap-2">
+                <div
+                  className="flex-1 overflow-hidden rounded-full"
+                  style={{
+                    height: 3,
+                    background: `${params.color}22`,
+                  }}
+                >
+                  <div
+                    className="h-full rounded-full transition-all duration-1000 ease-linear"
+                    style={{
+                      width: `${progress}%`,
+                      background: params.color,
+                      opacity: status?.isPlaying ? 1 : 0.4,
+                    }}
+                  />
+                </div>
+                <span
+                  className="shrink-0 text-xs tabular-nums"
+                  style={{ color: params.color, opacity: 0.5 }}
+                >
+                  {msToTime(elapsed)}/{msToTime(status?.durationMs ?? 0)}
+                </span>
+              </div>
+            )}
+            {isPaused && !showBar && (
               <p
                 className="mt-0.5 text-xs"
                 style={{ color: params.color, opacity: 0.4 }}
               >
                 Paused
               </p>
-            )}
-            {progress !== null && (
-              <div
-                className="mt-1.5 h-0.5 w-full overflow-hidden rounded-full"
-                style={{ background: `${params.color}22` }}
-              >
-                <div
-                  className="h-full rounded-full transition-all duration-1000 ease-linear"
-                  style={{
-                    width: `${progress}%`,
-                    background: params.color,
-                    opacity: status?.isPlaying ? 1 : 0.4,
-                  }}
-                />
-              </div>
             )}
           </>
         ) : (
