@@ -102,6 +102,12 @@ export default function WidgetPage() {
   }, [activeFont]);
 
   useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.style.background = params.bg;
+    document.body.style.background = params.bg;
+  }, [params.bg]);
+
+  useEffect(() => {
     async function fetchStatus() {
       try {
         const res = await fetch("/api/spotify");
