@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Spotify Widget
 
-## Getting Started
+> **Vibe coded by AI** — this project was built entirely through natural language conversations with an AI coding agent.
 
-First, run the development server:
+An OBS-ready widget that displays your currently playing Spotify track. Uses the Spotify Web API to fetch your real-time listening status and renders a clean, transparent overlay perfect for streaming.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Shows album art, track name, and artist
+- Auto-refreshes every 5 seconds
+- Transparent background for OBS overlay
+- Only detects **your** account (uses OAuth refresh token)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Create an app at [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
+2. Add a redirect URI (e.g. `http://localhost:3000/api/auth/callback` or your Vercel domain)
+3. Copy `.env.example` to `.env.local` and fill in `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET`
+4. Visit `/api/auth` to authorize → copy the displayed refresh token into `.env.local` as `SPOTIFY_REFRESH_TOKEN`
 
-## Learn More
+## OBS Integration
 
-To learn more about Next.js, take a look at the following resources:
+Add a **Browser Source** in OBS with:
+- URL: `http://localhost:3000/widget`
+- Width: 400, Height: 100
+- Enable "Refresh browser when scene becomes active"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tech
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Next.js](https://nextjs.org) (App Router)
+- [Tailwind CSS](https://tailwindcss.com)
+- [Spotify Web API](https://developer.spotify.com/documentation/web-api)
