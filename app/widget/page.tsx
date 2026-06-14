@@ -41,6 +41,40 @@ function useParams(): WidgetParams {
   };
 }
 
+const GOOGLE_FONTS = new Set([
+  "Inter",
+  "Roboto",
+  "Open Sans",
+  "Montserrat",
+  "Poppins",
+  "Lato",
+  "Noto Sans",
+  "Oswald",
+  "Raleway",
+  "Source Sans Pro",
+]);
+
+function useGoogleFont(font: string) {
+  useEffect(() => {
+    if (!GOOGLE_FONTS.has(font)) return;
+
+    const id = `gf-${font.replace(/\s+/g, "-")}`;
+    if (document.getElementById(id)) return;
+
+    const family = font.replace(/ /g, "+");
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${family}:wght@400;600;700&display=swap`;
+    document.head.appendChild(link);
+
+    return () => {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    };
+  }, [font]);
+}
+
 const sizeMap: Record<string, { img: number; title: string; artist: string }> =
   {
     sm: { img: 12, title: "text-sm", artist: "text-xs" },
@@ -54,6 +88,8 @@ export default function WidgetPage() {
   const [animating, setAnimating] = useState(false);
   const prevTitleRef = useRef<string | undefined>(undefined);
   const params = useParams();
+
+  useGoogleFont(params.font);
 
   useEffect(() => {
     async function fetchStatus() {
@@ -148,7 +184,7 @@ export default function WidgetPage() {
             )}
             {progress !== null && (
               <div
-                className="mt-1.5 h-1 w-full overflow-hidden rounded-full"
+                className="mt-1.5 h-0.5 w-full overflow-hidden rounded-full"
                 style={{ background: `${params.color}22` }}
               >
                 <div

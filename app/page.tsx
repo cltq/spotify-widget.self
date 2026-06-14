@@ -8,7 +8,19 @@ type SpotifyUser = {
   product?: string;
 };
 
-const FONTS = ["system-ui", "sans-serif", "monospace", "serif", "Arial", "Inter"];
+const SYSTEM_FONTS = ["system-ui", "sans-serif", "monospace", "serif"];
+const GOOGLE_FONTS = [
+  "Inter",
+  "Roboto",
+  "Open Sans",
+  "Montserrat",
+  "Poppins",
+  "Lato",
+  "Noto Sans",
+  "Oswald",
+  "Raleway",
+  "Source Sans Pro",
+];
 
 export default function Home() {
   const [user, setUser] = useState<SpotifyUser | null>(null);
@@ -59,7 +71,8 @@ export default function Home() {
             />
           )}
           <span className="text-zinc-300">
-            Connected as <strong className="text-white">{user.displayName}</strong>
+            Connected as{" "}
+            <strong className="text-white">{user.displayName}</strong>
           </span>
         </div>
       )}
@@ -73,99 +86,122 @@ export default function Home() {
         </a>
       </div>
 
-      <div className="w-full max-w-lg rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-        <h2 className="mb-4 font-semibold text-white">Widget Customizer</h2>
+      <div className="flex w-full max-w-4xl flex-col gap-6 lg:flex-row">
+        <div className="min-h-32 flex-1 overflow-hidden rounded-lg border border-zinc-800 bg-zinc-950">
+          <iframe
+            key={widgetUrl}
+            src={widgetUrl}
+            title="Widget Preview"
+            className="h-full w-full"
+            style={{ minHeight: 160 }}
+          />
+        </div>
 
-        <div className="mb-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <label className="text-sm text-zinc-400">Background</label>
-            <div className="flex items-center gap-2">
+        <div className="w-full rounded-lg border border-zinc-800 bg-zinc-900 p-6 lg:w-80">
+          <h2 className="mb-4 font-semibold text-white">Customizer</h2>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm text-zinc-400">Background</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={bg === "transparent" ? "#000000" : bg}
+                  onChange={(e) => setBg(e.target.value)}
+                  className="size-7 cursor-pointer rounded border border-zinc-700 bg-transparent"
+                />
+                <button
+                  onClick={() =>
+                    setBg(bg === "transparent" ? "#000000" : "transparent")
+                  }
+                  className="rounded border border-zinc-700 px-2 py-1 text-xs text-zinc-400 hover:bg-zinc-800"
+                >
+                  {bg === "transparent" ? "Solid" : "Transparent"}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="text-sm text-zinc-400">Text Color</label>
               <input
                 type="color"
-                value={bg === "transparent" ? "#000000" : bg}
-                onChange={(e) => setBg(e.target.value)}
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
                 className="size-7 cursor-pointer rounded border border-zinc-700 bg-transparent"
               />
-              <button
-                onClick={() => setBg(bg === "transparent" ? "#000000" : "transparent")}
-                className="rounded border border-zinc-700 px-2 py-1 text-xs text-zinc-400 hover:bg-zinc-800"
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="text-sm text-zinc-400">Font</label>
+              <select
+                value={font}
+                onChange={(e) => setFont(e.target.value)}
+                className="w-36 rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-300"
               >
-                {bg === "transparent" ? "Solid" : "Transparent"}
+                <optgroup label="System">
+                  {SYSTEM_FONTS.map((f) => (
+                    <option key={f} value={f}>
+                      {f}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Google Fonts">
+                  {GOOGLE_FONTS.map((f) => (
+                    <option key={f} value={f}>
+                      {f}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="text-sm text-zinc-400">Size</label>
+              <div className="flex gap-1">
+                {["sm", "md", "lg"].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSize(s)}
+                    className={`rounded px-3 py-1 text-xs ${
+                      size === s
+                        ? "bg-green-600 text-white"
+                        : "border border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                    }`}
+                  >
+                    {s.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="text-sm text-zinc-400">Progress Bar</label>
+              <button
+                onClick={() => setShowProgress(!showProgress)}
+                className={`rounded px-3 py-1 text-xs ${
+                  showProgress
+                    ? "bg-green-600 text-white"
+                    : "border border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                }`}
+              >
+                {showProgress ? "On" : "Off"}
               </button>
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <label className="text-sm text-zinc-400">Text Color</label>
+          <div className="mt-6 flex items-center gap-2">
             <input
-              type="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="size-7 cursor-pointer rounded border border-zinc-700 bg-transparent"
+              readOnly
+              value={widgetUrl}
+              className="flex-1 rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-xs text-zinc-300"
             />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <label className="text-sm text-zinc-400">Font</label>
-            <select
-              value={font}
-              onChange={(e) => setFont(e.target.value)}
-              className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-300"
-            >
-              {FONTS.map((f) => (
-                <option key={f} value={f}>
-                  {f}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <label className="text-sm text-zinc-400">Size</label>
-            <div className="flex gap-1">
-              {["sm", "md", "lg"].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSize(s)}
-                  className={`rounded px-3 py-1 text-xs ${
-                    size === s
-                      ? "bg-green-600 text-white"
-                      : "border border-zinc-700 text-zinc-400 hover:bg-zinc-800"
-                  }`}
-                >
-                  {s.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <label className="text-sm text-zinc-400">Progress Bar</label>
             <button
-              onClick={() => setShowProgress(!showProgress)}
-              className={`rounded px-3 py-1 text-xs ${
-                showProgress
-                  ? "bg-green-600 text-white"
-                  : "border border-zinc-700 text-zinc-400 hover:bg-zinc-800"
-              }`}
+              onClick={handleCopy}
+              className="rounded bg-zinc-800 px-4 py-2 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-700"
             >
-              {showProgress ? "On" : "Off"}
+              {copied ? "Copied!" : "Copy"}
             </button>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            readOnly
-            value={widgetUrl}
-            className="flex-1 rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-xs text-zinc-300"
-          />
-          <button
-            onClick={handleCopy}
-            className="rounded bg-zinc-800 px-4 py-2 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-700"
-          >
-            {copied ? "Copied!" : "Copy"}
-          </button>
         </div>
       </div>
 
