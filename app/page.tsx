@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 type SpotifyUser = {
   displayName: string;
@@ -8,11 +8,17 @@ type SpotifyUser = {
   product?: string;
 };
 
+const FONTS = ["system-ui", "sans-serif", "monospace", "serif", "Arial", "Inter"];
+
 export default function Home() {
   const [user, setUser] = useState<SpotifyUser | null>(null);
-  const [origin] = useState(() =>
-    typeof window !== "undefined" ? window.location.origin : ""
-  );
+  const [bg, setBg] = useState("transparent");
+  const [color, setColor] = useState("#ffffff");
+  const [font, setFont] = useState("system-ui");
+  const [size, setSize] = useState("md");
+  const [showProgress, setShowProgress] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
 
   useEffect(() => {
     fetch("/api/spotify/user")
@@ -23,14 +29,25 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
+  const widgetUrl = `${origin}/widget?bg=${encodeURIComponent(bg)}&color=${encodeURIComponent(color)}&font=${encodeURIComponent(font)}&size=${size}&progress=${showProgress ? "bar" : "none"}`;
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(widgetUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [widgetUrl]);
+
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center gap-8 bg-zinc-950 p-8 font-sans">
-      <h1 className="text-3xl font-bold tracking-tight text-white">
-        Spotify Widget
-      </h1>
-      <p className="max-w-md text-center text-zinc-400">
-        An OBS-ready widget that shows your currently playing Spotify track.
-      </p>
+    <div className="flex min-h-dvh flex-col items-center gap-8 bg-zinc-950 p-8 pb-16 font-sans">
+      <div className="flex flex-col items-center gap-4 pt-8">
+        <h1 className="text-3xl font-bold tracking-tight text-white">
+          Spotify Widget
+        </h1>
+        <p className="max-w-md text-center text-zinc-400">
+          An OBS-ready widget that shows your currently playing Spotify track.
+        </p>
+      </div>
 
       {user && (
         <div className="flex items-center gap-3 rounded-full border border-zinc-800 bg-zinc-900 px-5 py-2 text-sm">
@@ -54,12 +71,102 @@ export default function Home() {
         >
           Connect Spotify
         </a>
-        <a
-          href="/widget"
-          className="rounded-full border border-zinc-700 px-6 py-3 font-medium text-zinc-300 transition-colors hover:bg-zinc-800"
-        >
-          View Widget
-        </a>
+      </div>
+
+      <div className="w-full max-w-lg rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+        <h2 className="mb-4 font-semibold text-white">Widget Customizer</h2>
+
+        <div className="mb-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="text-sm text-zinc-400">Background</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={bg === "transparent" ? "#000000" : bg}
+                onChange={(e) => setBg(e.target.value)}
+                className="size-7 cursor-pointer rounded border border-zinc-700 bg-transparent"
+              />
+              <button
+                onClick={() => setBg(bg === "transparent" ? "#000000" : "transparent")}
+                className="rounded border border-zinc-700 px-2 py-1 text-xs text-zinc-400 hover:bg-zinc-800"
+              >
+                {bg === "transparent" ? "Solid" : "Transparent"}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <label className="text-sm text-zinc-400">Text Color</label>
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              className="size-7 cursor-pointer rounded border border-zinc-700 bg-transparent"
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <label className="text-sm text-zinc-400">Font</label>
+            <select
+              value={font}
+              onChange={(e) => setFont(e.target.value)}
+              className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-300"
+            >
+              {FONTS.map((f) => (
+                <option key={f} value={f}>
+                  {f}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <label className="text-sm text-zinc-400">Size</label>
+            <div className="flex gap-1">
+              {["sm", "md", "lg"].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setSize(s)}
+                  className={`rounded px-3 py-1 text-xs ${
+                    size === s
+                      ? "bg-green-600 text-white"
+                      : "border border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+                  }`}
+                >
+                  {s.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <label className="text-sm text-zinc-400">Progress Bar</label>
+            <button
+              onClick={() => setShowProgress(!showProgress)}
+              className={`rounded px-3 py-1 text-xs ${
+                showProgress
+                  ? "bg-green-600 text-white"
+                  : "border border-zinc-700 text-zinc-400 hover:bg-zinc-800"
+              }`}
+            >
+              {showProgress ? "On" : "Off"}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            readOnly
+            value={widgetUrl}
+            className="flex-1 rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-xs text-zinc-300"
+          />
+          <button
+            onClick={handleCopy}
+            className="rounded bg-zinc-800 px-4 py-2 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-700"
+          >
+            {copied ? "Copied!" : "Copy"}
+          </button>
+        </div>
       </div>
 
       <p className="max-w-md text-center text-xs text-zinc-600">
@@ -72,28 +179,6 @@ export default function Home() {
         </a>{" "}
         to make it your own.
       </p>
-
-      <div className="mt-8 max-w-lg rounded-lg border border-zinc-800 bg-zinc-900 p-6 text-sm">
-        <h2 className="mb-2 font-semibold text-white">OBS Setup</h2>
-        <ol className="ml-4 list-decimal space-y-1 text-zinc-400">
-          <li>
-            Add a <strong className="text-zinc-200">Browser Source</strong> in OBS
-          </li>
-          <li>
-            Set URL to{" "}
-            <code className="rounded bg-zinc-800 px-1 text-zinc-200">
-              {origin}/widget
-            </code>
-          </li>
-          <li>Set width to 400, height to 100</li>
-          <li>
-            Enable{" "}
-            <strong className="text-zinc-200">
-              Refresh browser when scene becomes active
-            </strong>
-          </li>
-        </ol>
-      </div>
     </div>
   );
 }
